@@ -1,0 +1,47 @@
+Chapter 6
+Enums:
+
+
+Ex:
+enum IpAddrKind {
+V4,
+V6,
+}
+ struct IpAddr {
+ kind: IpAddrKind,
+ address: String,
+}
+let home = IpAddr {
+kind: IpAddrKind::V4,
+address: String::from("127.0.0.1"),
+};
+let loopback = IpAddr {
+kind: IpAddrKind::V6,
+address: String::from("::1"),
+}; Listing 6-1: Storing the data and IpAddrKind variant of an IP address using a
+struct
+
+    - Enums can handle multiple types, including other enums
+Ex:
+enum IpAddr {
+V4(u8, u8, u8, u8),
+V6(String),
+}
+let home = IpAddr::V4(127, 0, 0, 1);
+let loopback = IpAddr::V6(String::from("::1")); We’ve shown several different
+ways to define data structures to store version four and version six IP
+addresses. However, as it turns out, wanting to store IP addresses and encode
+which kind they are is so common that the standard library has a definition we
+can use! Let’s look at how the standard library defines IpAddr: it has the exact
+enum and variants that we’ve defined and used, but it embeds the address data
+inside the variants in the form of two different structs, which are defined
+differently for each variant: struct Ipv4Addr {
+// --snip--
+}
+struct Ipv6Addr {
+// --snip--
+}
+enum IpAddr {
+V4(Ipv4Addr),
+V6(Ipv6Addr),
+}

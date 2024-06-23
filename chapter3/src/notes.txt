@@ -1,0 +1,247 @@
+Constants are values bound to a name and are not allowed to change (cannot use mut)
+    Ex: const MAX_POINTS: u32 = 100_000;
+
+Shadowing: You can declare a new variable with teh same name as a previous variable
+    - First variable shadows the second. I.E. the second value si what appears when var is used
+    Ex: 
+
+fn main() {
+    let x = 5;
+    let x = x + 1;
+    let x = x * 2;
+    println!("The value of x is: {}", x);
+}
+Out: The value of x is: 12
+
+    - Shadowing is different than mut. Let allows us to preform transformations on a value but still be immuntable after
+    - Another difference between them is because we are effectively creating a new variable and therefore could change the type.
+
+---Data Types---
+
+-Scalar Types: Represents a single value-
+Integer Types: An integer is a number without a fractional component. 
+    - Signed: Could be negative or positive
+    - Unsigned: Only can be positive
+8-bit   i8    u8
+16-bit  i16   u16
+32-bit  i32   u32
+64-bit  i64   u64
+arch    isize usize
+
+Floating Point Types:
+    - Rust has two floating-point numbers with decimals F32, and F64.
+    - Default type is f64 bc its ~ the same speed as f32 but more precise
+    Ex:
+fn main() {
+    let x = 2.0; // f64
+    let y: f32 = 3.0; // f32
+}
+
+Numeric Operations:
+
+fn main() {
+    // addition
+    let sum = 5 + 10;
+    // subtraction
+    let difference = 95.5 - 4.3;
+    // multiplication
+    let product = 4 * 30;
+    // division
+    let quotient = 56.7 / 32.2;
+    // remainder
+    let remainder = 43 % 5;`
+}
+
+Boolean Type:
+
+fn main() {
+    let t = true;
+    let f: bool = false; // with explicit type annotation
+}
+
+Character Type: Single letters and ascii used through single quotes.
+    Ex:
+fn main() {
+    let c = 'z';
+    let z = ' ';
+    let heart_eyed_cat = '😀';
+}
+
+-Compound Types: Can group multiple values into one type. Rust has two primitive compound type.-
+Tuple type: General way of grouping together some number of other values with a varitey of types into one compound type.
+    - We create a tuple by writing a comma-seperated list of values inside paretheses. 
+    Ex:
+fn main() {
+    let tup: (i32, f64, u8) = (500, 6.4, 1);
+}
+
+Alternative Ex
+fn main() {
+    let tup = (500, 6.4, 1);
+    let (x, y, z) = tup;
+    println!("The value of y is: {}", y);
+}
+    - This program creates a tuple and binds it to the variabel tup. It then uses a pattern with let to take tupa dn turn it into three seperate variables (x,y,z)
+    - This is called destructuring, because it breask teh single tuple ito three parts
+    - We can also access a tuple element directly by using a period with index
+    Ex:
+fn main() {
+    let x: (i32, f64, u8) = (500, 6.4, 1);
+    let five_hundred = x.0;
+    let six_point_four = x.1;
+    let one = x.2;
+}
+
+Array Type: Every element in an array must have the same type. Have a fixed length.
+    Ex:
+fn main() {
+    let a = [1, 2, 3, 4, 5];
+}
+
+    - Allocated on the stack rather than the heap. 
+Accessing Array elements
+fn main() {
+    let a = [1, 2, 3, 4, 5];
+    let first = a[0];
+    let second = a[1];
+    }
+
+    - However, if u attempt to access and invalid index, it will throw a runtime error\
+    - This causes the program to Panic. This means the program exists with an error.
+
+---Functions---
+    - Functions utilize snakecase (underscores and lowercase)
+fn main() {
+    println!("Hello, world!");
+    another_function();
+}
+fn another_function() {
+    println!("Another function.");
+}
+
+    - functions can also contain parameters
+    - In functiuon signuartures, you must declare the type of each parameter.
+fn main() {
+    another_function(5);
+}
+fn another_function(x: i32) {
+    println!("The value of x is: {}", x);
+}
+
+    - When you want multiple parameters, seperate them with commas
+
+fn main() {
+    another_function(5, 6);
+}
+fn another_function(x: i32, y: i32) {
+    println!("The value of x is: {}", x);
+    println!("The value of y is: {}", y);
+}
+
+
+Statements and Expressions
+fn main() {
+    let x = 5;
+    let y = {
+        let x = 3;
+        x + 1
+    };
+    println!("The value of y is: {}", y);
+}
+
+Return values
+    - Don't name return vaues but do declare their type after an arrow
+fn five() -> i32 {
+    5
+}
+fn main() {
+    let x = five();
+    println!("The value of x is: {}", x);
+}
+Output: The value of x is: 5
+
+    - five() simply initializes x and thats why we can get away with five() only contating '5'
+
+Another Example:
+fn main() {
+    let x = plus_one(5);
+    println!("The value of x is: {}", x);
+}
+fn plus_one(x: i32) -> i32 {
+    x + 1
+}
+Output:The value of x is: 6.
+
+---Control Flow---
+If Expressions
+Ex:
+fn main() {
+    let number = 3;
+    if number < 5 {
+    println!("condition was true");
+    } else {
+    println!("condition was false");
+    }
+}
+
+    - If Expressions sometimes called arms like mathc expressions.
+
+Handling Multiple Conditions:
+fn main() {
+    let number = 6;
+    if number % 4 == 0 {
+    println!("number is divisible by 4");
+    } else if number % 3 == 0 {
+    println!("number is divisible by 3");
+    } else if number % 2 == 0 {
+    println!("number is divisible by 2");
+    } else {
+    println!("number is not divisible by 4, 3, or 2");
+    }
+}
+
+Output: number is divisible by 3
+
+Using If with let Statement
+fn main() {
+    let condition = true;
+    let number = if condition {
+    5
+    } else {
+    6
+    };
+    println!("The value of number is: {}", number);
+}
+
+The number variable will be bound to a value based on the outcome of the if Statement
+
+*We cannot evaluate to multiple different types! 
+
+
+Repetition with Loops
+While Loops:
+fn main() {
+    let mut number = 3;
+    while number != 0 {
+    println!("{}!", number);
+    number = number - 1;
+    }
+    println!("LIFTOFF!!!");
+}
+
+For Loops:
+fn main() {
+    let a = [10, 20, 30, 40, 50];
+    for element in a.iter() {
+    println!("the value is: {}", element);
+}
+}
+
+Alternative Approach
+
+fn main() {
+    for number in (1..4).rev() {
+    println!("{}!", number);
+    }
+    println!("LIFTOFF!!!");
+}

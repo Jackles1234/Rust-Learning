@@ -1,0 +1,51 @@
+---Ownership---
+All programs have to manage the way they use a computer's memory while running
+    - Garbage collection looks for memory that not being used as the program runs.
+    - Otherwise, the programmer must explicityly allocate and free memory through Ownership
+
+The Stack 
+    - Parts of memory that is availible to your code to use at runtime. Structured in very different way
+    - Stack stores values in the order it gets them and removes in the opposite order (LIFO)
+        - Adding data is pushing onto the stack
+        - Removing data is called popping off the stack
+    - Stacks are fast because they never have to search for a place to put new data or get data bc that place is always the top
+    - Must be fixed size
+The Heap
+    - Data with a size unkwown or that may change
+    - Less organized. OS will just look for space to put the data and returns a pointer to the address of that location
+        - Known as "Allocateding on the heap"
+    - This causes data access to be a bit slower
+    - The memory address of the data will always be attached to the data. 
+    - Minimize the amount of duplicate data on heap
+
+Ownership Rules
+    - Each value in Rust has a variable that’s called its owner.
+    - There can be only one owner at a time.
+    - When the owner goes out of scope, the value will be dropped.
+    Ex:
+{ // s is not valid here; it's not yet declared
+    let s = "hello"; // s is valid from this point forward
+    // do stuff with s
+} // this scope is now over, and s is no longer valid
+
+The String Type:
+    - We have seen String literals, whereby a string value is hardcoded into the program
+        - Howevever they are not immuntable
+        - Rust has another string type String which is allocated on the heap.
+    let s = String::from("hello");
+    - The :: operator allows us to namespace this from function under String type.
+    - This is because how the two types deal with memory
+Ex:
+let mut s = String::from("hello");
+s.push_str(", world!"); // push_str() appends a literal to a String
+println!("{}", s); // this will print `hello, world!`
+
+Memory and Allocation
+With teh String type, in order to support a mutable growable piece of text we need to allocated an ammount of memory on the heap, unknown at compile time to hold the contents
+    - The memory must be requested from the operating system at runtime.
+    - We need a way of returning this memory to the operating system when we’re done with our String
+First part is doen for us with String::from
+
+
+
+
