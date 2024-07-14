@@ -1,0 +1,185 @@
+Modules to reuse and Organize Code
+Module: Namespace tyhat contains definitions of functions or types
+Mod - declares a new Modules
+ - By default, they are private. But pub makes them visible outside of Namespace
+ - use keyword brings modules, or definition inside modules, into scope
+
+mod and the FileSystem
+
+
+mod network {   //Everything inside namespace Network
+    fn connect() {
+    }
+    }
+// network::connect() would call this function
+
+mod client {
+    fn connect() {
+    }
+    }
+//client::connect would call this function
+
+Organizational Structure:
+communicator
+|--network
+|--client
+
+
+#########################################
+
+mod network {
+fn connect() {
+}
+mod client {
+fn connect() {
+}
+}
+}
+
+// now network::connect and network::client::connect are both correct ways to call a function
+
+Organizational Structure:
+communicator
+|--network
+    |--client
+##########################################################################################
+Moving Modules to Other Files
+
+mod client {
+fn connect() {
+}
+}
+mod network {
+fn connect() {
+}
+mod server {
+fn connect() {
+}
+}
+}
+
+
+Organizational Structure:
+communicator
+|--client
+|--network
+    |--server
+
+*However getting kinda lengthy, so it would be a good idea to seperate these into seperate files. 
+WE are going to replace the client module with the dclaration o client module.
+
+mod client; // we are still declaring the module, but the semicolons tell rust to look in another file
+mod network {
+fn connect() {
+}
+mod server {
+fn connect() {
+}
+}
+}
+
+
+client.rs:
+fn connect() {
+}
+
+// We don't need a mod in this folder because we already declared the mod in lib.rs!
+
+#Compiling will lead to a few errors that show there are unused funcitons, which is OK for now. 
+
+
+mod client;
+mod network;
+
+network.rs:
+fn connect() {
+}
+    mod server {
+        fn connect() {
+    }
+}
+
+//INSTRUCTIONS
+1. Make a new directory named network, the parent module’s name.
+2. Move the src/network.rs file into the new network directory and
+rename it src/network/mod.rs.
+3. Move the submodule file src/server.rs into the network directory.
+
+New file structure will look like this
+
+
+Organizational Structure:
+src
+|--client.rs
+|--lib.rs
+|--network
+    |--mod.rs
+    |--server.rs
+
+Rules of Module Filesystems
+
+###main.rs###
+    extern crate communicator;
+    fn main() {
+    communicator::client::connect();
+    }
+
+main.rs is now the root fileof the binary crate which is seperate from the exhisting whose root is lib.rs 
+
+
+right now our binary crate just calls our libraries connect funciton. If we build, it will error as our 'client' is private
+*crux of all warnings
+Priv and Pub in context of Rust:
+    if you specicify that a function is public. You can call from binary crate and the 'unused function' error will go away
+    Pub shows rust that the function will be used outside of program
+
+###src/lib.rs###
+pub mod client;
+
+However, new error 'connect' is private. Need to make public aswell
+###src/client.rs###
+pub fn connect() {
+}
+
+
+Privacy Rules
+Overall, these are the rules for item visibility:
+    - If an item is public, it can be accessed through any of its parent modules.
+    - If an item is private, it can be accessed only by its immediate parent module and any of the parent’s child modules.
+
+
+mod outermost { //private
+    pub fn middle_function() {}
+    fn middle_secret_function() {}  //not public
+    mod inside {
+    pub fn inner_function() {}
+    fn secret_function() {}
+    }
+    }
+
+fn try_me() {
+    outermost::middle_function();
+    outermost::middle_secret_function();
+    outermost::inside::inner_function();
+    outermost::inside::secret_function();
+}
+
+//try_me is allowed access to outermostbecause it is in the current root module
+// middle function witll also work because it is public
+//However outermost::middle_secret_function will cause a complication error because it is private
+
+
+//inside module is private with no child modules so it can be access only by its current module  outermost
+// try_me function is not allowed to call 'outermost::inside::inner_function' nor 'outermost::inside::secret::function'
+
+
+Fixing the Errors:
+
+// What if the inside module were public?
+// What if outermost were public and inside were private?
+// What if, in the body of inner_function, you called
+// ::outermost::middle_secret_function()? (The two colons at the beginning
+// mean that we want to refer to the modules starting from the root
+// module.)
+
+Referring to Names in Different Modules
