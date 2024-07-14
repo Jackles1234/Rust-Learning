@@ -182,4 +182,83 @@ Fixing the Errors:
 // mean that we want to refer to the modules starting from the root
 // module.)
 
-Referring to Names in Different Modules
+
+Bringing into scope using the 'use' keyword
+
+Lengthy calling between many functions
+pub mod a {
+pub mod series {
+pub mod of {
+pub fn nested_modules() {}
+}
+}
+}
+
+fn main() {
+a::series::of::nested_modules();
+}
+
+The 'use' keyword allows for 'a::series::of::' to be shortened 
+
+pub mod a {
+pub mod series {
+pub mod of {
+pub fn nested_modules() {}
+}
+}
+}
+use a::series::of;
+fn main() {
+of::nested_modules();
+}
+
+// However, it only brings what you have specified into scope. It does not bring children of modules into scope. 
+
+could also have specified the whole function like so:
+
+use a::series::of::nested_modules;
+fn main() {
+nested_modules();
+}
+
+This allows you to execute all the modules and reference the function directly
+Enums are also a sort of namespace, we can bring them into namespace aswell with 'use'
+Ex:
+enum TrafficLight {
+Red,
+Yellow,
+Green,
+}
+use TrafficLight::{Red, Yellow};
+fn main() {
+let red = Red;
+let yellow = Yellow;
+let green = TrafficLight::Green;
+}
+
+/We’re still specifying the TrafficLight namespace for the Green variant because we didn’t include Green in the use statement.
+
+Bringing All Names into Scope with a Glob
+
+
+To bring all items in a namepsace into scrope, use the * or glob operator
+
+
+enum TrafficLight {
+Red,
+Yellow,
+Green,
+}
+use TrafficLight::*;
+fn main() {
+let red = Red;
+let yellow = Yellow;
+let green = Green;
+}
+
+Globs are convienent, but may cause naming conflicts if you are bringing in excess modules.
+
+
+###Using super to Access a Parent Module###
+
+

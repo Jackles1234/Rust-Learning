@@ -18,6 +18,7 @@ pub mod a {
     }
     }
     use a::series::of::nested_modules;
-    fn main() {
-    nested_modules();
-    }
+fn main() {
+nested_modules();
+}
+
