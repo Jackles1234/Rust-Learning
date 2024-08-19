@@ -1,0 +1,240 @@
+ERROR HANDLING:
+############################
+Two categories: 
+Recoverable Errors:
+    - It’s reasonable to report the problem to the user and retry the operation.
+    - 
+Unrecoverable errors:
+    - Its like trying to access a location beyond the end of an array
+
+Rust doesnt have exceptions: 
+ - type Result<T, E> for Recoverable Errors
+ - panic! macro stops execution when teh program encounter an unrecoverable errors
+
+Unrecoverable Errors with panic!
+
+ - By default, when a panic occurs, the program starts unwinding, which means Rust walks back up the stack and cleans up the data from each function it encounters
+
+
+Using a panic! Backtrace:
+
+Example: What haoppens when a panic! call comes form a library because of a bug in our code instead of a panic! call directly.
+
+fn main() {
+let v = vec![1, 2, 3];
+v[99];
+}
+
+//attempting to access tghe 100th elemetn
+
+A backtrace is a list of all the functions that have been called to get to this point
+
+Backtraces in Rust work as they do in other languages: 
+the key to reading the backtrace is to start from the top and read until you see files you wrote
+
+We will come back to cover when we should and should not use panic! 
+
+##### Recoverable Errors with Result #####
+Most errors aren’t serious enough to require the program to stop entirely. 
+
+Result enum is defined as having two variants, Ok and Err, as follows: 
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+
+these are generic type parameters. T = Success and E = Failure
+
+Instead use this: 
+
+use std::fs::File;
+fn main() {
+let f = File::open("hello.txt");
+let f = match f {
+Ok(file) => file,
+Err(error) => {
+panic!("There was a problem opening the file: {:?}", error)
+},
+};
+}
+
+//Note that, like the Option enum, the Result enum and its variants have
+been imported in the prelude, so we don’t need to specify Result:: before
+the Ok and Err variants in the match arms
+
+
+Matching on Different Errors:
+
+The code above will panic! no matter why file::open faield. 
+We anmt a more specific reason for what a file doesnt exist
+
+
+error.kind() == ErrorKind::NotFound is called a match guard
+It is an extra condition on match arm that further refines the arms pattern
+
+This condition must be true for that arms code to run. Otherwise it will move on. 
+
+"The condition we want to check in the match guard is whether the
+value returned by error.kind() is the NotFound variant of the ErrorKind enum."
+
+Shortcuts for Panic on Error; unwrap and expect:
+
+Result<T, E> type has many helper methods defined on it to do various tasks
+ - unwrap: shortcut method like match
+    - If the result value ios the OK variant, unwrap return the value inside the OK
+    - but if ERR, it will call panic! macro..
+
+Ex:
+use std::fs::File;
+fn main() {
+let f = File::open("hello.txt").unwrap();
+}
+
+  - expect: similar to unwrap, but lets us choose panic! message
+
+Ex:
+use std::fs::File;
+fn main() {
+let f = File::open("hello.txt").expect("Failed to open hello.txt");
+}
+
+
+Propogating Errors:
+When writing a function whose implementation calls something that might fail, instead of handling the error within this function. 
+You can return the error to teh calling code so that it can decide what to do.
+
+
+use std::io;
+use std::io::Read;
+use std::fs::File;
+fn read_username_from_file() -> Result<String, io::Error> {
+    let f = File::open("hello.txt");
+    let mut f = match f {
+        Ok(file) => file,
+        Err(e) => return Err(e),
+    };
+    let mut s = String::new();
+    match f.read_to_string(&mut s) {
+        Ok(_) => Ok(s),
+        Err(e) => Err(e),
+    }
+}
+
+return type: Result<String, io::Error>
+Return type is a Result<T, E> where T is a string and E is an io::Error
+
+Instead of calling panic! in the Err case, we return early from this function and pass the error value from File::open back to the calling code as this function’s error value . 
+If File::open succeeds, we store the file handle in the variable f and continue.
+
+
+Shortcut for Propogating Errors: the ? Operator:
+
+This version of read_username_from_file has same function but differnet implementation
+
+use std::io;
+use std::io::Read;
+use std::fs::File;
+fn read_username_from_file() -> Result<String, io::Error> {
+let mut f = File::open("hello.txt")?;
+let mut s = String::new();
+f.read_to_string(&mut s)?;
+Ok(s)
+}
+
+If the value of result is an OK, the value inside Ok will get reutred and program will continue.
+If the the whole value is an Err, the value ionside the Err will be returned from the whjole function as if we had used the return keyword. 
+
+There is a difference between match and ? operatior. 
+Error values with the ? go through the form function, whicgh is used to convert errors from one type into another. 
+Useful if trying to determine what part of a program is failing based on error.
+
+? Eliminates lots of boilerplate and makes this functions implementation simpler. Can simplify the above code to:
+
+use std::io;
+use std::io::Read;
+use std::fs::File;
+fn read_username_from_file() -> Result<String, io::Error> {
+    let mut s = String::new();
+    File::open("hello.txt")?.read_to_string(&mut s)?;
+    Ok(s)
+}
+The ? Operator Can only be used in Functions that Return Result@
+
+
+To panic! or Not to panic!
+How do decide when code panics? No way to recover. 
+Returning Result is a good default chocie when you're defining a function that migth fail
+
+When should you panic code?:
+Prototype code: Use methods like unwrap that cvould panic which is a placehold for how you want your code to handle errors:
+    - unwrap abnd expect methods are very handy when prototyping before you're ready to handle errors
+
+Cases in Which You Have More Information Than the Compiler:
+You need to handle both posibilies with teh 'result' type in rust. 
+How about when you don;t know it won't fail?
+
+Using unwrap to forcefully extrat teh OK value from result:
+
+use std::net::IpAddr;
+let home: IpAddr = "127.0.0.1".parse().unwrap();
+
+Here, the string "127.0.0.1" is hardcoded, and you know it is a valid IP address. Even though the parse method returns a Result
+
+When not to use unwrap:
+    If the string wasn't hardcoded—say, if it was user input—then there would be a real possibility of failure 
+
+
+Guidelines for Error Handling
+Its advisable to panic when its possible that your code could end up in a bad state.
+Bad state:
+- The bad state is not something that’s expected to happen occasionally.
+- Your code after this point needs to rely on not being in this bad state.
+- There’s not a good way to encode this information in the types you use.
+
+You want to panic if unexopected values are passed. 
+However, even when a bad stae is reached, its still more appropriate to return a Result than to make a panic! call.
+ Ex: Examples include a parser being given malformed data or an HTTP request returning a status that indicates you have hit a rate limit
+
+When your code performs operations on values, your code should verify the values are valid first and panic if the values aren’t valid
+
+Functions often have contracts:
+Their behavior is only guaranteed if the inputs meet particular requirements.
+
+Creating Custom Types for Validation
+Recall number guessing from Chap 2
+
+loop {
+// --snip--
+let guess: i32 = match guess.trim().parse() {
+    Ok(num) => num,
+    Err(_) => continue,
+};
+if guess < 1 || guess > 100 {
+    println!("The secret number will be between 1 and 100.");
+    continue;
+}
+match guess.cmp(&secret_number) {
+/   
+}
+}
+
+//Not ideal solution
+
+New solution:
+
+pub struct Guess {  //Define Struct Guess
+    value: u32,
+}
+impl Guess {
+    pub fn new(value: u32) -> Guess {   //New gyuess
+    if value < 1 || value > 100 {   //if value doesnt pass test, panic!
+    panic!("Guess value must be between 1 and 100, got {}.", value);
+    }
+    Guess { //if it does pass, set vlaue parameter and return Guess
+        value
+        }
+}
+pub fn value(&self) -> u32 {
+self.value
+}
+}
